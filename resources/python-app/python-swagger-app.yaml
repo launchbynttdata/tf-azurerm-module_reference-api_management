@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: python-swagger
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: python-swagger
+  template:
+    metadata:
+      labels:
+        app: python-swagger
+    spec:
+      containers:
+        - name: python-swagger
+          image: dsopublic.azurecr.io/python-swagger:v1
+          ports:
+            - containerPort: 8080
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: python-swagger-lb-int
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 80
+      targetPort: 8080
+  selector:
+    app: python-swagger
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: python-swagger
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 8080
+  selector:
+    app: python-swagger
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: python-swagger-ingress-private
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    cert-manager.io/cluster-issuer: "private-ca-cluster-issuer"
+spec:
+  ingressClassName: private-ingress
+  tls:
+    - hosts:
+        - python-swagger.ado-k8s.launchbynttdata.com
+      secretName: python-swagger-ingress-private-tls
+  rules:
+    - host: python-swagger.ado-k8s.launchbynttdata.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: python-swagger
+                port:
+                  number: 80
