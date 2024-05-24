@@ -130,7 +130,7 @@ No providers.
 | <a name="module_dns_records"></a> [dns\_records](#module\_dns\_records) | git::https://github.com/launchbynttdata/tf-azurerm-module_primitive-private_dns_records.git | 1.0.0 |
 | <a name="module_nsg"></a> [nsg](#module\_nsg) | git::https://github.com/launchbynttdata/tf-azurerm-module_primitive-network_security_group.git | 1.0.0 |
 | <a name="module_nsg_subnet_assoc"></a> [nsg\_subnet\_assoc](#module\_nsg\_subnet\_assoc) | git::https://github.com/launchbynttdata/tf-azurerm-module_primitive-nsg_subnet_association.git | 1.0.0 |
-| <a name="module_apim"></a> [apim](#module\_apim) | git::https://github.com/launchbynttdata/tf-azurerm-module_primitive-api_management.git | feature/init |
+| <a name="module_apim"></a> [apim](#module\_apim) | git::https://github.com/launchbynttdata/tf-azurerm-module_primitive-api_management.git | 1.0.0 |
 
 ## Resources
 

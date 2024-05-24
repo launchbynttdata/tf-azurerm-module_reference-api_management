@@ -228,7 +228,7 @@ module "nsg_subnet_assoc" {
 
 
 module "apim" {
-  source = "git::https://github.com/launchbynttdata/tf-azurerm-module_primitive-api_management.git?ref=feature/init"
+  source = "git::https://github.com/launchbynttdata/tf-azurerm-module_primitive-api_management.git?ref=1.0.0"
 
   # count               = 0
   name                = module.resource_names["apim"].standard
