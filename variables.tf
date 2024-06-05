@@ -24,7 +24,7 @@ variable "product_service" {
     For example, backend, frontend, middleware etc.
   EOF
   type        = string
-  default     = "kube"
+  default     = "apim"
 }
 
 variable "environment" {
@@ -84,7 +84,7 @@ variable "resource_names_map" {
 }
 
 variable "resource_group_name" {
-  description = "Name of the resource group"
+  description = "Name of the resource group. If not specified, this module will create a resource group."
   type        = string
   default     = null
 }
@@ -116,7 +116,10 @@ variable "additional_location" {
 
 variable "zones" {
   type        = list(number)
-  description = "(Optional) Specifies a list of Availability Zones in which this API Management service should be located. Changing this forces a new API Management service to be created. Supported in Premium Tier."
+  description = <<EOT
+    (Optional) Specifies a list of Availability Zones in which this API Management service should be located. Changing this
+    forces a new API Management service to be created. Supported in Premium Tier.
+  EOT
   default     = []
 }
 
@@ -126,7 +129,10 @@ variable "certificate_configuration" {
     certificate_password = string
     store_name           = string
   }))
-  description = "List of certificate configurations"
+  description = <<EOT
+    List of certificate configurations. The Certificate must be base encoded pfx or pem format. `certificate_password` can be null if
+    not present. `store_name` can be `CertificateAuthority` or `Root`.
+  EOT
   default     = []
 }
 
@@ -241,14 +247,41 @@ variable "security_configuration" {
 
 variable "virtual_network_type" {
   type        = string
-  description = "The type of virtual network you want to use, valid values include: None, External, Internal."
+  description = <<EOT
+    The type of virtual network you want to use, valid values include: None, External, Internal.
+    External and Internal are only supported in the SKUs - Premium and Developer
+  EOT
   default     = "None"
 }
 
 variable "virtual_network_configuration" {
   type        = list(string)
-  description = "The id(s) of the subnet(s) that will be used for the API Management. Required when virtual_network_type is External or Internal"
+  description = <<EOT
+    The id(s) of the subnet(s) that will be used for the API Management. Required when virtual_network_type is External or Internal
+    that is in the SKUs - Premium and Developer
+  EOT
   default     = []
+}
+
+variable "additional_nsg_rules" {
+  description = <<EOT
+    A list of additional NSG rules to be applied to the API Management subnet. Only applicable when virtual_network_type
+    is External or Internal.
+    Use `priority` > 105 to avoid conflicts with default rules.
+  EOT
+  type = list(object({
+    name                       = string
+    priority                   = number
+    direction                  = string
+    access                     = string
+    protocol                   = string
+    source_port_range          = string
+    destination_port_range     = string
+    source_address_prefix      = string
+    destination_address_prefix = string
+  }))
+
+  default = []
 }
 
 ### IDENTITY
@@ -281,7 +314,7 @@ variable "default_ttl" {
 }
 
 variable "additional_vnet_links" {
-  description = "A list of VNET IDs for which vnet links to be created with the private AKS cluster DNS Zone. Applicable only when private_cluster_enabled is true."
+  description = "A list of VNET IDs for which vnet links to be created with the private AKS cluster DNS Zone. Applicable only when network_type=Internal"
   type        = map(string)
   default     = {}
 }

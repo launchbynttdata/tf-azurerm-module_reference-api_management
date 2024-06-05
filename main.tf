@@ -59,7 +59,7 @@ module "public_ip" {
 module "apim_default_dns_zone" {
   source = "git::https://github.com/launchbynttdata/tf-azurerm-module_primitive-private_dns_zone.git?ref=1.0.0"
 
-  count = var.virtual_network_type != "None" ? 1 : 0
+  count = var.virtual_network_type == "Internal" ? 1 : 0
 
   zone_name           = var.dns_zone_suffix
   resource_group_name = var.resource_group_name != null ? var.resource_group_name : module.resource_group[0].name
@@ -72,7 +72,7 @@ module "apim_default_dns_zone" {
 module "vnet_links" {
   source = "git::https://github.com/launchbynttdata/tf-azurerm-module_primitive-private_dns_vnet_link.git?ref=1.0.0"
 
-  for_each = local.all_vnet_links
+  for_each = var.virtual_network_type == "Internal" ? local.all_vnet_links : {}
 
   link_name             = each.key
   resource_group_name   = var.resource_group_name != null ? var.resource_group_name : module.resource_group[0].name
@@ -87,7 +87,7 @@ module "vnet_links" {
 
 module "dns_records" {
   source = "git::https://github.com/launchbynttdata/tf-azurerm-module_primitive-private_dns_records.git?ref=1.0.0"
-
+  count  = var.virtual_network_type == "Internal" ? 1 : 0
   a_records = {
     "apim" = {
       zone_name           = module.apim_default_dns_zone[0].zone_name
@@ -132,84 +132,13 @@ module "dns_records" {
 module "nsg" {
   source = "git::https://github.com/launchbynttdata/tf-azurerm-module_primitive-network_security_group.git?ref=1.0.0"
 
+  count = length(var.virtual_network_configuration) > 0 ? 1 : 0
+
   name                = module.resource_names["nsg"].standard
   location            = var.region
   resource_group_name = var.resource_group_name != null ? var.resource_group_name : module.resource_group[0].name
 
-  security_rules = [
-    {
-      name                       = "management-endpoint"
-      description                = "Management endpoint for Azure portal and PowerShell"
-      protocol                   = "Tcp"
-      source_port_range          = "*"
-      destination_port_range     = 3443
-      source_address_prefix      = "ApiManagement"
-      destination_address_prefix = "VirtualNetwork"
-      access                     = "Allow"
-      priority                   = 100
-      direction                  = "Inbound"
-    },
-    {
-      name                       = "load-balancer"
-      description                = "Azure Infrastructure Load Balancer"
-      protocol                   = "Tcp"
-      source_port_range          = "*"
-      destination_port_range     = 6390
-      source_address_prefix      = "AzureLoadBalancer"
-      destination_address_prefix = "VirtualNetwork"
-      access                     = "Allow"
-      priority                   = 101
-      direction                  = "Inbound"
-    },
-    {
-      name                       = "azure-storage"
-      description                = "Dependency on Azure Storage for core service functionality"
-      protocol                   = "Tcp"
-      source_port_range          = "*"
-      destination_port_range     = 443
-      source_address_prefix      = "VirtualNetwork"
-      destination_address_prefix = "Storage"
-      access                     = "Allow"
-      priority                   = 102
-      direction                  = "Outbound"
-    },
-    {
-      name                       = "azure-sql"
-      description                = "Access to Azure SQL endpoints for core service functionality"
-      protocol                   = "Tcp"
-      source_port_range          = "*"
-      destination_port_range     = 1443
-      source_address_prefix      = "VirtualNetwork"
-      destination_address_prefix = "SQL"
-      access                     = "Allow"
-      priority                   = 103
-      direction                  = "Outbound"
-    },
-    {
-      name                       = "azure-key-vault"
-      description                = "Access to Azure Key Vault for core service functionality"
-      protocol                   = "Tcp"
-      source_port_range          = "*"
-      destination_port_range     = 443
-      source_address_prefix      = "VirtualNetwork"
-      destination_address_prefix = "AzureKeyVault"
-      access                     = "Allow"
-      priority                   = 104
-      direction                  = "Outbound"
-    },
-    {
-      name                       = "azure-monitor"
-      description                = "Publish Diagnostics Logs and Metrics, Resource Health, and Application Insights"
-      protocol                   = "Tcp"
-      source_port_range          = "*"
-      destination_port_ranges    = [1886, 443]
-      source_address_prefix      = "VirtualNetwork"
-      destination_address_prefix = "AzureMonitor"
-      access                     = "Allow"
-      priority                   = 105
-      direction                  = "Outbound"
-    }
-  ]
+  security_rules = local.all_nsg_rules
 
   tags = merge(local.tags, {
     resource_name = module.resource_names["nsg"].standard
@@ -219,9 +148,12 @@ module "nsg" {
 }
 
 module "nsg_subnet_assoc" {
-  source                    = "git::https://github.com/launchbynttdata/tf-azurerm-module_primitive-nsg_subnet_association.git?ref=1.0.0"
+  source = "git::https://github.com/launchbynttdata/tf-azurerm-module_primitive-nsg_subnet_association.git?ref=1.0.0"
+
+  count = length(var.virtual_network_configuration) > 0 ? 1 : 0
+
   subnet_id                 = var.virtual_network_configuration[0]
-  network_security_group_id = module.nsg.network_security_group_id
+  network_security_group_id = module.nsg[0].network_security_group_id
 
   depends_on = [module.nsg]
 }
@@ -230,7 +162,6 @@ module "nsg_subnet_assoc" {
 module "apim" {
   source = "git::https://github.com/launchbynttdata/tf-azurerm-module_primitive-api_management.git?ref=1.0.0"
 
-  # count               = 0
   name                = module.resource_names["apim"].standard
   location            = var.region
   resource_group_name = var.resource_group_name != null ? var.resource_group_name : module.resource_group[0].name
