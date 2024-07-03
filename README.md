@@ -122,15 +122,15 @@ No providers.
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_resource_names"></a> [resource\_names](#module\_resource\_names) | git::https://github.com/launchbynttdata/tf-launch-module_library-resource_name.git | 1.0.1 |
-| <a name="module_resource_group"></a> [resource\_group](#module\_resource\_group) | git::https://github.com/launchbynttdata/tf-azurerm-module_primitive-resource_group.git | 1.0.0 |
-| <a name="module_public_ip"></a> [public\_ip](#module\_public\_ip) | git::https://github.com/launchbynttdata/tf-azurerm-module_primitive-public_ip | 1.0.0 |
-| <a name="module_apim_default_dns_zone"></a> [apim\_default\_dns\_zone](#module\_apim\_default\_dns\_zone) | git::https://github.com/launchbynttdata/tf-azurerm-module_primitive-private_dns_zone.git | 1.0.0 |
-| <a name="module_vnet_links"></a> [vnet\_links](#module\_vnet\_links) | git::https://github.com/launchbynttdata/tf-azurerm-module_primitive-private_dns_vnet_link.git | 1.0.0 |
-| <a name="module_dns_records"></a> [dns\_records](#module\_dns\_records) | git::https://github.com/launchbynttdata/tf-azurerm-module_primitive-private_dns_records.git | 1.0.0 |
-| <a name="module_nsg"></a> [nsg](#module\_nsg) | git::https://github.com/launchbynttdata/tf-azurerm-module_primitive-network_security_group.git | 1.0.0 |
-| <a name="module_nsg_subnet_assoc"></a> [nsg\_subnet\_assoc](#module\_nsg\_subnet\_assoc) | git::https://github.com/launchbynttdata/tf-azurerm-module_primitive-nsg_subnet_association.git | 1.0.0 |
-| <a name="module_apim"></a> [apim](#module\_apim) | git::https://github.com/launchbynttdata/tf-azurerm-module_primitive-api_management.git | 1.0.0 |
+| <a name="module_resource_names"></a> [resource\_names](#module\_resource\_names) | terraform.registry.launch.nttdata.com/module_library/resource_name/launch | ~> 1.0 |
+| <a name="module_resource_group"></a> [resource\_group](#module\_resource\_group) | terraform.registry.launch.nttdata.com/module_primitive/resource_group/azurerm | ~> 1.0 |
+| <a name="module_public_ip"></a> [public\_ip](#module\_public\_ip) | terraform.registry.launch.nttdata.com/module_primitive/public_ip/azurerm | ~> 1.0 |
+| <a name="module_apim_default_dns_zone"></a> [apim\_default\_dns\_zone](#module\_apim\_default\_dns\_zone) | terraform.registry.launch.nttdata.com/module_primitive/private_dns_zone/azurerm | ~> 1.0 |
+| <a name="module_vnet_links"></a> [vnet\_links](#module\_vnet\_links) | terraform.registry.launch.nttdata.com/module_primitive/private_dns_vnet_link/azurerm | ~> 1.0 |
+| <a name="module_dns_records"></a> [dns\_records](#module\_dns\_records) | terraform.registry.launch.nttdata.com/module_primitive/private_dns_records/azurerm | ~> 1.0 |
+| <a name="module_nsg"></a> [nsg](#module\_nsg) | terraform.registry.launch.nttdata.com/module_primitive/network_security_group/azurerm | ~> 1.0 |
+| <a name="module_nsg_subnet_assoc"></a> [nsg\_subnet\_assoc](#module\_nsg\_subnet\_assoc) | terraform.registry.launch.nttdata.com/module_primitive/nsg_subnet_association/azurerm | ~> 1.0 |
+| <a name="module_apim"></a> [apim](#module\_apim) | terraform.registry.launch.nttdata.com/module_primitive/api_management/azurerm | ~> 1.0 |
 
 ## Resources
 
