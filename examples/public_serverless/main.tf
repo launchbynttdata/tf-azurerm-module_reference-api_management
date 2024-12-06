@@ -10,13 +10,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-terraform {
-  required_version = "~> 1.0"
+module "apim" {
+  source = "../.."
 
-  required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "~>3.67"
-    }
-  }
+  product_family     = var.product_family
+  product_service    = var.product_service
+  environment        = var.environment
+  environment_number = var.environment_number
+  resource_number    = var.resource_number
+  region             = var.region
+
+  resource_names_map = var.resource_names_map
+
+  sku_name        = var.sku_name
+  publisher_name  = var.publisher_name
+  publisher_email = var.publisher_email
+
+  public_network_access_enabled = var.public_network_access_enabled
+
+  tags = var.tags
 }

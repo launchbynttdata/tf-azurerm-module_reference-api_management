@@ -22,6 +22,11 @@ locals {
 
   all_vnet_links = merge(local.apim_vnet_link, var.additional_vnet_links)
 
+  create_ip_address = (
+    (startswith(var.sku_name, "Developer") || startswith(var.sku_name, "Premium"))
+    && length(var.virtual_network_configuration) > 0
+  ) ? true : false
+
   default_apim_nsg_rules = [
     {
       name                       = "management-endpoint"
