@@ -1,5 +1,18 @@
 # public_serverless
 
+Please set a provider block with the following, to avoid soft-deletes of the APIM instance which can cause problems with the tests
+```
+provider "azurerm" {
+  features {
+    api_management {
+      purge_soft_delete_on_destroy = true
+      recover_soft_deleted         = true
+    }
+  }
+}
+```
+
+
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
 
