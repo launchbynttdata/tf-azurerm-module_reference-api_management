@@ -183,7 +183,7 @@ module "apim" {
   zones           = var.zones
 
   public_network_access_enabled = var.public_network_access_enabled
-  public_ip_address_id          = length(module.public_ip) > 0 ? module.public_ip.id : null
+  public_ip_address_id          = length(module.public_ip) > 0 ? module.public_ip[0].id : null
 
   additional_location = var.additional_location
 
