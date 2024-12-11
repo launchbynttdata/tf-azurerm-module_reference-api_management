@@ -44,6 +44,8 @@ module "public_ip" {
   source  = "terraform.registry.launch.nttdata.com/module_primitive/public_ip/azurerm"
   version = "~> 1.0"
 
+  count = local.create_ip_address ? 1 : 0
+
   name                = module.resource_names["public_ip"].standard
   resource_group_name = var.resource_group_name != null ? var.resource_group_name : module.resource_group[0].name
   location            = var.region
@@ -181,7 +183,7 @@ module "apim" {
   zones           = var.zones
 
   public_network_access_enabled = var.public_network_access_enabled
-  public_ip_address_id          = module.public_ip.id
+  public_ip_address_id          = length(module.public_ip) > 0 ? module.public_ip[0].id : null
 
   additional_location = var.additional_location
 
