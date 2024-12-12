@@ -24,8 +24,9 @@ locals {
 
   create_ip_address = (
     (startswith(var.sku_name, "Developer") || startswith(var.sku_name, "Premium"))
+    && contains(["External", "Internal"], var.virtual_network_type)
     && length(var.virtual_network_configuration) > 0
-  ) ? true : false
+  )
 
   default_apim_nsg_rules = [
     {
