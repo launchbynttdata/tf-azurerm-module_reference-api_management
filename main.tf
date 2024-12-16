@@ -34,7 +34,7 @@ module "resource_names_v2" {
 
   for_each = local.use_v2_resource_names ? var.resource_names_map : {}
 
-  region                  = join("", split("-", var.location))
+  region                  = join("", split("-", var.region))
   class_env               = var.environment
   cloud_resource_type     = each.value.name
   instance_env            = var.resource_number
