@@ -28,6 +28,22 @@ module "resource_names" {
 
 }
 
+module "resource_names_v2" {
+  source  = "terraform.registry.launch.nttdata.com/module_library/resource_name/launch"
+  version = "~> 2.0"
+
+  for_each = local.use_v2_resource_names ? var.resource_names_map : {}
+
+  region                  = join("", split("-", var.location))
+  class_env               = var.environment
+  cloud_resource_type     = each.value.name
+  instance_env            = var.resource_number
+  maximum_length          = each.value.max_length
+  logical_product_family  = var.product_family
+  logical_product_service = var.product_service
+  use_azure_region_abbr   = true
+}
+
 module "resource_group" {
   source  = "terraform.registry.launch.nttdata.com/module_primitive/resource_group/azurerm"
   version = "~> 1.0"
