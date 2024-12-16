@@ -22,6 +22,8 @@ locals {
 
   all_vnet_links = merge(local.apim_vnet_link, var.additional_vnet_links)
 
+  use_v2_resource_names = (var.resource_names_version == "2")
+
   create_ip_address = (
     (startswith(var.sku_name, "Developer") || startswith(var.sku_name, "Premium"))
     && length(var.virtual_network_configuration) > 0

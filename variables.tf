@@ -89,6 +89,12 @@ variable "resource_group_name" {
   default     = null
 }
 
+variable "resource_names_version" {
+  description = "Major version of the resource names module to use"
+  type        = string
+  default     = "1"
+}
+
 variable "sku_name" {
   type        = string
   description = <<EOT
