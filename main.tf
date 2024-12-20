@@ -62,16 +62,16 @@ module "public_ip" {
 
   count = local.create_ip_address ? 1 : 0
 
-  name                = local.public_ip
+  name                = local.public_ip_name
   resource_group_name = var.resource_group_name != null ? var.resource_group_name : module.resource_group[0].name
   location            = var.region
   allocation_method   = "Static"
-  domain_name_label   = local.public_ip
+  domain_name_label   = local.public_ip_name
   sku                 = "Standard"
   sku_tier            = "Regional"
 
   tags = merge(local.tags, {
-    resource_name = local.public_ip
+    resource_name = local.public_ip_name
   })
 
   depends_on = [module.resource_group]
