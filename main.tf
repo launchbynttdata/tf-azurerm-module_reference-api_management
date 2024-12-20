@@ -51,9 +51,9 @@ module "resource_group" {
   count = var.resource_group_name != null ? 0 : 1
 
   location = var.region
-  name     = module.resource_names["resource_group"].standard
+  name     = local.resource_group_name
 
-  tags = merge(local.tags, { resource_name = module.resource_names["resource_group"].standard })
+  tags = merge(local.tags, { resource_name = local.resource_group_name })
 }
 
 module "public_ip" {
@@ -62,16 +62,16 @@ module "public_ip" {
 
   count = local.create_ip_address ? 1 : 0
 
-  name                = module.resource_names["public_ip"].standard
+  name                = local.public_ip
   resource_group_name = var.resource_group_name != null ? var.resource_group_name : module.resource_group[0].name
   location            = var.region
   allocation_method   = "Static"
-  domain_name_label   = module.resource_names["public_ip"].standard
+  domain_name_label   = local.public_ip
   sku                 = "Standard"
   sku_tier            = "Regional"
 
   tags = merge(local.tags, {
-    resource_name = module.resource_names["public_ip"].standard
+    resource_name = local.public_ip
   })
 
   depends_on = [module.resource_group]
@@ -117,35 +117,35 @@ module "dns_records" {
       zone_name           = module.apim_default_dns_zone[0].zone_name
       resource_group_name = var.resource_group_name != null ? var.resource_group_name : module.resource_group[0].name
       ttl                 = var.default_ttl
-      name                = module.resource_names["apim"].standard
+      name                = local.apim_name
       records             = module.apim.api_management_private_ip_addresses
     }
     "portal" = {
       zone_name           = module.apim_default_dns_zone[0].zone_name
       resource_group_name = var.resource_group_name != null ? var.resource_group_name : module.resource_group[0].name
       ttl                 = var.default_ttl
-      name                = "${module.resource_names["apim"].standard}.portal"
+      name                = "${local.apim_name}.portal"
       records             = module.apim.api_management_private_ip_addresses
     }
     "developer" = {
       zone_name           = module.apim_default_dns_zone[0].zone_name
       resource_group_name = var.resource_group_name != null ? var.resource_group_name : module.resource_group[0].name
       ttl                 = var.default_ttl
-      name                = "${module.resource_names["apim"].standard}.developer"
+      name                = "${local.apim_name}.developer"
       records             = module.apim.api_management_private_ip_addresses
     }
     "management" = {
       zone_name           = module.apim_default_dns_zone[0].zone_name
       resource_group_name = var.resource_group_name != null ? var.resource_group_name : module.resource_group[0].name
       ttl                 = var.default_ttl
-      name                = "${module.resource_names["apim"].standard}.management"
+      name                = "${local.apim_name}.management"
       records             = module.apim.api_management_private_ip_addresses
     }
     "scm" = {
       zone_name           = module.apim_default_dns_zone[0].zone_name
       resource_group_name = var.resource_group_name != null ? var.resource_group_name : module.resource_group[0].name
       ttl                 = var.default_ttl
-      name                = "${module.resource_names["apim"].standard}.scm"
+      name                = "${local.apim_name}.scm"
       records             = module.apim.api_management_private_ip_addresses
     }
   }
@@ -159,14 +159,14 @@ module "nsg" {
 
   count = length(var.virtual_network_configuration) > 0 ? 1 : 0
 
-  name                = module.resource_names["nsg"].standard
+  name                = local.nsg_name
   location            = var.region
   resource_group_name = var.resource_group_name != null ? var.resource_group_name : module.resource_group[0].name
 
   security_rules = local.all_nsg_rules
 
   tags = merge(local.tags, {
-    resource_name = module.resource_names["nsg"].standard
+    resource_name = local.nsg_name
   })
 
   depends_on = [module.resource_group]
@@ -189,7 +189,7 @@ module "apim" {
   source  = "terraform.registry.launch.nttdata.com/module_primitive/api_management/azurerm"
   version = "~> 1.0"
 
-  name                = module.resource_names["apim"].standard
+  name                = local.apim_name
   location            = var.region
   resource_group_name = var.resource_group_name != null ? var.resource_group_name : module.resource_group[0].name
 
