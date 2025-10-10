@@ -241,3 +241,136 @@ module "apim" {
 
   depends_on = [module.resource_group, module.public_ip]
 }
+
+
+module "apim_certificates" {
+  source  = "terraform.registry.launch.nttdata.com/module_primitive/api_management_certificate/azurerm"
+  version = "~> 1.0"
+
+  for_each = var.certificates
+
+  resource_group_name = var.resource_group_name != null ? var.resource_group_name : module.resource_group[0].name
+  api_management_name = module.apim.api_management_name
+
+  name                         = each.key
+  data                         = each.value.data
+  password                     = each.value.password
+  key_vault_secret_id          = each.value.key_vault_secret_id
+  key_vault_identity_client_id = each.value.key_vault_identity_client_id
+
+  depends_on = [module.apim]
+}
+
+module "apim_loggers" {
+  source  = "terraform.registry.launch.nttdata.com/module_primitive/api_management_logger/azurerm"
+  version = "~> 1.0"
+
+  for_each = var.loggers
+
+  resource_group_name = var.resource_group_name != null ? var.resource_group_name : module.resource_group[0].name
+  api_management_name = module.apim.api_management_name
+
+  name        = each.key
+  buffered    = each.value.buffered
+  description = each.value.description
+
+  application_insights = each.value.application_insights
+  eventhub             = each.value.eventhub
+
+  depends_on = [module.apim]
+}
+
+
+module "apim_backends" {
+  source  = "terraform.registry.launch.nttdata.com/module_primitive/api_management_backend/azurerm"
+  version = "~> 1.0"
+
+  for_each = var.backends
+
+  resource_group_name = var.resource_group_name != null ? var.resource_group_name : module.resource_group[0].name
+  api_management_name = module.apim.api_management_name
+
+  name        = each.key
+  title       = each.value.title
+  description = each.value.description
+  url         = each.value.url
+  protocol    = each.value.protocol
+
+  credentials = each.value.credentials != null ? {
+    authorization = each.value.credentials.authorization
+    certificate = each.value.credentials.certificate != null ? [
+      // When defining backends, reference certificates using their names instead of their thumbprints
+      for cert in each.value.credentials.certificate : module.apim_certificates[cert].certificate_thumbprint
+    ] : null
+    header = each.value.credentials.header
+    query  = each.value.credentials.query
+  } : null
+  proxy                  = each.value.proxy
+  resource_id            = each.value.resource_id
+  service_fabric_cluster = each.value.service_fabric_cluster
+  tls                    = each.value.tls
+
+  depends_on = [module.apim, module.apim_certificates]
+}
+
+
+module "apim_apis" {
+  source  = "terraform.registry.launch.nttdata.com/module_primitive/api_management_api/azurerm"
+  version = "~> 1.0"
+
+  for_each = var.apis
+
+  resource_group_name = var.resource_group_name != null ? var.resource_group_name : module.resource_group[0].name
+  api_management_name = module.apim.api_management_name
+
+  name         = each.key
+  display_name = each.value.display_name
+  description  = each.value.description
+  path         = each.value.path
+  protocols    = each.value.protocols
+  api_type     = each.value.api_type
+
+  service_url           = each.value.service_url
+  soap_pass_through     = each.value.soap_pass_through
+  subscription_required = each.value.subscription_required
+
+  import = each.value.import
+  policy = each.value.policy
+
+  contact              = each.value.contact
+  license              = each.value.license
+  terms_of_service_url = each.value.terms_of_service_url
+
+  # module does not support multiple revisions at this time
+  # terraform would destroy the previous revision if changed
+  revision = "1"
+
+  depends_on = [module.apim, module.apim_backends]
+}
+
+module "apim_diagnostics" {
+  source  = "terraform.registry.launch.nttdata.com/module_primitive/api_management_diagnostic/azurerm"
+  version = "~> 1.0"
+
+  for_each = var.diagnostics
+
+  resource_group_name = var.resource_group_name != null ? var.resource_group_name : module.resource_group[0].name
+  api_management_name = module.apim.api_management_name
+  logger_name         = each.value.logger_name
+  api_name            = each.value.api_name
+  identifier          = each.value.identifier
+
+  always_log_errors         = each.value.always_log_errors
+  http_correlation_protocol = each.value.http_correlation_protocol
+  operation_name_format     = each.value.operation_name_format
+  log_client_ip             = each.value.log_client_ip
+  sampling_percentage       = each.value.sampling_percentage
+  verbosity                 = each.value.verbosity
+
+  frontend_request  = each.value.frontend_request
+  frontend_response = each.value.frontend_response
+  backend_request   = each.value.backend_request
+  backend_response  = each.value.backend_response
+
+  depends_on = [module.apim_apis, module.apim_loggers]
+}

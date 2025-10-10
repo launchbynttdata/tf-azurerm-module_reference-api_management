@@ -72,3 +72,56 @@ output "public_ip_address" {
 output "resource_group_name" {
   value = var.resource_group_name != null ? var.resource_group_name : module.resource_group[0].name
 }
+
+output "api_management_apis" {
+  description = "List of APIs created in the API Management Service"
+  value = {
+    for k, v in module.apim_apis : k => {
+      id   = v.api_id
+      name = v.api_name
+      path = v.api_path
+    }
+  }
+}
+
+output "api_management_backends" {
+  description = "List of backends created in the API Management Service"
+  value = {
+    for k, v in module.apim_backends : k => {
+      id   = v.backend_id
+      name = v.backend_name
+      url  = v.backend_url
+    }
+  }
+}
+
+output "api_management_certificates" {
+  description = "List of certificates created in the API Management Service"
+  value = {
+    for k, v in module.apim_certificates : k => {
+      id         = v.certificate_id
+      name       = v.certificate_name
+      thumbprint = v.certificate_thumbprint
+    }
+  }
+}
+
+output "api_management_diagnostics" {
+  description = "List of diagnostics created in the API Management Service"
+  value = {
+    for k, v in module.apim_diagnostics : k => {
+      resource_id = v.diagnostic_resource_id
+      identifier  = v.diagnostic_identifier
+    }
+  }
+}
+
+output "api_management_loggers" {
+  description = "List of loggers created in the API Management Service"
+  value = {
+    for k, v in module.apim_loggers : k => {
+      id   = v.logger_id
+      name = v.logger_name
+    }
+  }
+}

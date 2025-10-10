@@ -1,0 +1,21 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "version": "1.0.0",
+    "title": "Terratest API",
+    "description": "API for use with Terratest"
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "description": "Gets the root of the API",
+        "operationId": "getRoot",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          }
+        }
+      }
+    }
+  }
+}
