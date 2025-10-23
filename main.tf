@@ -280,6 +280,22 @@ module "apim_loggers" {
   depends_on = [module.apim]
 }
 
+module "apim_named_values" {
+  source = "git::https://github.com/launchbynttdata/tf-azurerm-module_primitive-api_management_named_value.git?ref=feature!/initial-implementation"
+
+  for_each = var.named_values
+
+  resource_group_name = var.resource_group_name != null ? var.resource_group_name : module.resource_group[0].name
+  api_management_name = module.apim.api_management_name
+
+  name                 = each.key
+  display_name         = coalesce(each.value.display_name, each.key)
+  value                = each.value.value
+  secret               = each.value.secret
+  value_from_key_vault = each.value.value_from_key_vault
+
+  depends_on = [module.apim]
+}
 
 module "apim_backends" {
   source  = "terraform.registry.launch.nttdata.com/module_primitive/api_management_backend/azurerm"
@@ -299,7 +315,7 @@ module "apim_backends" {
   credentials = each.value.credentials != null ? {
     authorization = each.value.credentials.authorization
     certificate = each.value.credentials.certificate != null ? [
-      // When defining backends, reference certificates using their names instead of their thumbprints
+      // Users of this module define certificates by name, here we map those names to the thumbprints
       for cert in each.value.credentials.certificate : module.apim_certificates[cert].certificate_thumbprint
     ] : null
     header = each.value.credentials.header
@@ -345,7 +361,7 @@ module "apim_apis" {
   # terraform would destroy the previous revision if changed
   revision = "1"
 
-  depends_on = [module.apim, module.apim_backends]
+  depends_on = [module.apim, module.apim_backends, module.apim_named_values]
 }
 
 module "apim_diagnostics" {

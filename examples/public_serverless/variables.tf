@@ -275,6 +275,20 @@ variable "loggers" {
   default = {}
 }
 
+variable "named_values" {
+  description = "A map of named value definitions to be created in the API Management Service."
+  type = map(object({
+    display_name = optional(string, null)
+    value        = optional(string, null)
+    secret       = optional(bool, false)
+    value_from_key_vault = optional(object({
+      secret_id          = string
+      identity_client_id = optional(string, null)
+    }), null)
+  }))
+  default = {}
+}
+
 variable "use_service_principal" {
   description = "Set to false when running locally without a service principal"
   type        = bool

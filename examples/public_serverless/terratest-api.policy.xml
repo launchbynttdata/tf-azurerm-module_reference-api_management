@@ -2,7 +2,7 @@
     <inbound>
         <return-response>
             <set-status code="200" reason="OK" />
-            <set-body>@(context.Deployment.ServiceName)</set-body>
+            <set-body>{{terratest-named-value}}</set-body>
         </return-response>
     </inbound>
     <backend />

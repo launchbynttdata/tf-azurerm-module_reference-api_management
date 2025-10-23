@@ -223,6 +223,12 @@ module "apim" {
       }
     }
   })
+  named_values = merge(var.named_values, {
+    "terratest-named-value" = {
+      value  = "0123456789abcdef"
+      secret = false
+    }
+  })
 
   tags = var.tags
 

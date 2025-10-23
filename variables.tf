@@ -438,6 +438,39 @@ variable "loggers" {
   default = {}
 }
 
+variable "named_values" {
+  description = "A map of named value definitions to be created in the API Management Service."
+  type = map(object({
+    display_name = optional(string, null)
+    value        = optional(string, null)
+    secret       = optional(bool, false)
+    value_from_key_vault = optional(object({
+      secret_id          = string
+      identity_client_id = optional(string, null)
+    }), null)
+  }))
+  default = {}
+
+  validation {
+    condition = alltrue([
+      for name, value in var.named_values : (
+        (value.value != null && value.value_from_key_vault == null) ||
+        (value.value == null && value.value_from_key_vault != null)
+      )
+    ])
+    error_message = "Each named value must have either 'value' or 'value_from_key_vault' set, but not both."
+  }
+
+  validation {
+    condition = alltrue([
+      for name, value in var.named_values : (
+        !(value.secret == false && value.value_from_key_vault != null)
+      )
+    ])
+    error_message = "Named values sourced from Key Vault must be marked as secret."
+  }
+}
+
 ### IDENTITY
 
 variable "identity_type" {
