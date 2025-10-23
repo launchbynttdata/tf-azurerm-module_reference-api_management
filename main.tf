@@ -221,7 +221,6 @@ module "apim" {
   scm_hostname_configuration = var.scm_hostname_configuration
   policy_configuration       = var.policy_configuration
 
-
   notification_sender_email = var.notification_sender_email
 
   enable_http2 = var.enable_http2
@@ -230,7 +229,6 @@ module "apim" {
 
   enable_sign_in = var.enable_sign_in
   enable_sign_up = var.enable_sign_up
-
 
   terms_of_service_configuration = var.terms_of_service_configuration
   virtual_network_configuration  = var.virtual_network_configuration
@@ -242,6 +240,18 @@ module "apim" {
   depends_on = [module.resource_group, module.public_ip]
 }
 
+module "key_vault_role_assignments" {
+  source  = "terraform.registry.launch.nttdata.com/module_primitive/role_assignment/azurerm"
+  version = "~> 1.0"
+
+  for_each = var.key_vaults
+
+  scope                = each.value
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = module.apim.api_management_identity[0].principal_id
+
+  depends_on = [module.apim]
+}
 
 module "apim_certificates" {
   source  = "terraform.registry.launch.nttdata.com/module_primitive/api_management_certificate/azurerm"
@@ -258,7 +268,7 @@ module "apim_certificates" {
   key_vault_secret_id          = each.value.key_vault_secret_id
   key_vault_identity_client_id = each.value.key_vault_identity_client_id
 
-  depends_on = [module.apim]
+  depends_on = [module.apim, module.key_vault_role_assignments]
 }
 
 module "apim_loggers" {
@@ -281,7 +291,8 @@ module "apim_loggers" {
 }
 
 module "apim_named_values" {
-  source = "git::https://github.com/launchbynttdata/tf-azurerm-module_primitive-api_management_named_value.git?ref=feature!/initial-implementation"
+  source  = "terraform.registry.launch.nttdata.com/module_primitive/api_management_named_value/azurerm"
+  version = "~> 1.0"
 
   for_each = var.named_values
 
@@ -294,7 +305,7 @@ module "apim_named_values" {
   secret               = each.value.secret
   value_from_key_vault = each.value.value_from_key_vault
 
-  depends_on = [module.apim]
+  depends_on = [module.apim, module.key_vault_role_assignments]
 }
 
 module "apim_backends" {

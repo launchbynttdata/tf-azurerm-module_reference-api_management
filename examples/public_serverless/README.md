@@ -36,9 +36,7 @@ provider "azurerm" {
 | <a name="module_log_analytics_workspace"></a> [log\_analytics\_workspace](#module\_log\_analytics\_workspace) | terraform.registry.launch.nttdata.com/module_primitive/log_analytics_workspace/azurerm | ~> 1.0 |
 | <a name="module_app_insights"></a> [app\_insights](#module\_app\_insights) | terraform.registry.launch.nttdata.com/module_primitive/application_insights/azurerm | ~> 1.0 |
 | <a name="module_certificate_deployment_role_assignment"></a> [certificate\_deployment\_role\_assignment](#module\_certificate\_deployment\_role\_assignment) | terraform.registry.launch.nttdata.com/module_primitive/role_assignment/azurerm | ~> 1.0 |
-| <a name="module_user_managed_identity"></a> [user\_managed\_identity](#module\_user\_managed\_identity) | terraform.registry.launch.nttdata.com/module_primitive/user_managed_identity/azurerm | ~> 1.0 |
 | <a name="module_key_vault"></a> [key\_vault](#module\_key\_vault) | terraform.registry.launch.nttdata.com/module_primitive/key_vault/azurerm | ~> 2.1 |
-| <a name="module_role_assignment"></a> [role\_assignment](#module\_role\_assignment) | terraform.registry.launch.nttdata.com/module_primitive/role_assignment/azurerm | ~> 1.0 |
 | <a name="module_key_vault_certificate"></a> [key\_vault\_certificate](#module\_key\_vault\_certificate) | terraform.registry.launch.nttdata.com/module_primitive/key_vault_certificate/azurerm | ~> 1.0 |
 | <a name="module_apim"></a> [apim](#module\_apim) | ../.. | n/a |
 

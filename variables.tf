@@ -471,6 +471,12 @@ variable "named_values" {
   }
 }
 
+variable "key_vaults" {
+  description = "A map of Key Vaults that the API Management Service will be given read access to"
+  type        = map(string)
+  default     = {}
+}
+
 ### IDENTITY
 
 variable "identity_type" {

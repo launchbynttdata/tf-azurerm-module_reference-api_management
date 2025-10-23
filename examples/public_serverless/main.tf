@@ -84,19 +84,6 @@ module "certificate_deployment_role_assignment" {
   depends_on = [module.resource_group]
 }
 
-module "user_managed_identity" {
-  source  = "terraform.registry.launch.nttdata.com/module_primitive/user_managed_identity/azurerm"
-  version = "~> 1.0"
-
-  user_assigned_identity_name = module.resource_names["user_assigned_identity"].minimal_random_suffix
-  resource_group_name         = module.resource_group.name
-  location                    = var.region
-
-  tags = merge(var.tags, { resource_name = module.resource_names["user_assigned_identity"].standard })
-
-  depends_on = [module.resource_group]
-}
-
 module "key_vault" {
   source  = "terraform.registry.launch.nttdata.com/module_primitive/key_vault/azurerm"
   version = "~> 2.1"
@@ -112,17 +99,6 @@ module "key_vault" {
   custom_tags = merge(var.tags, { resource_name = module.resource_names["key_vault"].standard })
 
   depends_on = [module.certificate_deployment_role_assignment]
-}
-
-module "role_assignment" {
-  source  = "terraform.registry.launch.nttdata.com/module_primitive/role_assignment/azurerm"
-  version = "~> 1.0"
-
-  scope                = module.key_vault.key_vault_id
-  principal_id         = module.user_managed_identity.principal_id
-  role_definition_name = "Key Vault Secrets User"
-
-  depends_on = [module.user_managed_identity, module.key_vault]
 }
 
 module "key_vault_certificate" {
@@ -162,8 +138,7 @@ module "apim" {
 
   resource_names_map = var.resource_names_map
 
-  identity_type = "UserAssigned"
-  identity_ids  = [module.user_managed_identity.id]
+  identity_type = "SystemAssigned"
 
   sku_name        = var.sku_name
   publisher_name  = var.publisher_name
@@ -197,8 +172,7 @@ module "apim" {
   })
   certificates = merge(var.certificates, {
     "terratest-certificate" = {
-      key_vault_secret_id          = module.key_vault_certificate.secret_id
-      key_vault_identity_client_id = module.user_managed_identity.client_id
+      key_vault_secret_id = module.key_vault_certificate.secret_id
     }
   })
   diagnostics = merge(var.diagnostics, {
@@ -230,12 +204,14 @@ module "apim" {
     }
   })
 
+  key_vaults = {
+    "example-key-vault" = module.key_vault.key_vault_id
+  }
+
   tags = var.tags
 
   depends_on = [
     module.app_insights,
-    module.user_managed_identity,
-    module.role_assignment,
     module.key_vault_certificate
   ]
 }
