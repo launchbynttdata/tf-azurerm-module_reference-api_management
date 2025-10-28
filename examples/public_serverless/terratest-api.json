@@ -1,21 +1,145 @@
+
 {
-  "openapi": "3.0.1",
-  "info": {
-    "version": "1.0.0",
-    "title": "Terratest API",
-    "description": "API for use with Terratest"
-  },
-  "paths": {
-    "/": {
-      "get": {
-        "description": "Gets the root of the API",
-        "operationId": "getRoot",
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          }
+    "openapi": "3.0.1",
+    "info": {
+        "title": "TMP Public Gateway",
+        "description": "Access to TMP from the internet",
+        "version": "1.0"
+    },
+    "paths": {
+        "/": {
+            "get": {
+                "summary": "getIndex",
+                "description": "Gets the index of TMP",
+                "operationId": "getIndex",
+                "responses": {
+                    "200": {
+                        "description": "Successful response"
+                    }
+                }
+            }
+        },
+        "/*": {
+            "get": {
+                "summary": "getResource",
+                "description": "Gets a resource in TMP",
+                "operationId": "getResource",
+                "responses": {
+                    "200": {
+                        "description": "Default response"
+                    },
+                    "400": {
+                        "description": "Default response"
+                    },
+                    "500": {
+                        "description": "Default response"
+                    }
+                }
+            }
+        },
+        "/api/*": {
+            "get": {
+                "summary": "getApiResource",
+                "description": "Gets an API resource in TMP",
+                "operationId": "getApiResource",
+                "responses": {
+                    "200": {
+                        "description": "Default response"
+                    },
+                    "400": {
+                        "description": "Default response"
+                    },
+                    "500": {
+                        "description": "Default response"
+                    }
+                }
+            },
+            "patch": {
+                "summary": "patchApiResource",
+                "description": "Patches an API resource in TMP",
+                "operationId": "patchApiResource",
+                "responses": {
+                    "200": {
+                        "description": "Default response"
+                    },
+                    "400": {
+                        "description": "Default response"
+                    },
+                    "500": {
+                        "description": "Default response"
+                    }
+                }
+            },
+            "post": {
+                "summary": "postApiResource",
+                "description": "Posts an API resource in TMP",
+                "operationId": "postApiResource",
+                "responses": {
+                    "200": {
+                        "description": "Default response"
+                    },
+                    "400": {
+                        "description": "Default response"
+                    },
+                    "500": {
+                        "description": "Default response"
+                    }
+                }
+            },
+            "put": {
+                "summary": "putApiResource",
+                "description": "Puts an API resource in TMP",
+                "operationId": "putApiResource",
+                "responses": {
+                    "200": {
+                        "description": "Default response"
+                    },
+                    "400": {
+                        "description": "Default response"
+                    },
+                    "500": {
+                        "description": "Default response"
+                    }
+                }
+            },
+            "delete": {
+                "summary": "deleteApiResource",
+                "description": "Deletes an API resource in TMP",
+                "operationId": "deleteApiResource",
+                "responses": {
+                    "200": {
+                        "description": "Default response"
+                    },
+                    "400": {
+                        "description": "Default response"
+                    },
+                    "500": {
+                        "description": "Default response"
+                    }
+                }
+            }
         }
-      }
-    }
-  }
+    },
+    "components": {
+        "securitySchemes": {
+            "apiKeyHeader": {
+                "type": "apiKey",
+                "name": "Ocp-Apim-Subscription-Key",
+                "in": "header"
+            },
+            "apiKeyQuery": {
+                "type": "apiKey",
+                "name": "subscription-key",
+                "in": "query"
+            }
+        }
+    },
+    "security": [
+        {
+            "apiKeyHeader": []
+        },
+        {
+            "apiKeyQuery": []
+        }
+    ]
 }
