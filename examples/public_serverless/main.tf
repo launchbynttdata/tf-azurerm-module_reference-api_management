@@ -169,7 +169,7 @@ module "apim" {
       subscription_required = false
 
       import = {
-        content_format = "openapi+json"
+        content_format = "swagger-json"
         content_value  = file("terratest-api.json")
       }
       policy = {
