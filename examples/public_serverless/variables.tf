@@ -149,7 +149,6 @@ variable "apis" {
     import = optional(object({
       content_format = string
       content_value  = string
-      content_value  = string
       content_url    = string
     }), null)
 

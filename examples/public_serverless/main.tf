@@ -155,11 +155,11 @@ module "apim" {
 
       import = {
         content_format = "openapi+json"
+        content_value  = null
         content_url    = "https://example.com/terratest-api.json"
       }
-    
+
       policy = {
-        # Use local file if needed, or URL
         xml_content = null
         xml_link    = "https://example.com/terratest-api.policy.xml"
       }
