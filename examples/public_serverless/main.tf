@@ -126,6 +126,21 @@ module "key_vault_certificate" {
   depends_on = [module.key_vault]
 }
 
+locals {
+  apis_with_content = {
+    for name, api in var.apis :
+    name => merge(api, {
+      import = api.import != null ? {
+        content_format = api.import.content_format
+        content_value  = file(api.import.content_value)
+      } : null,
+      policy = api.policy != null ? {
+        xml_content = file(api.policy.xml_content)
+      } : null
+    })
+  }
+}
+
 module "apim" {
   source = "../.."
 
@@ -146,7 +161,7 @@ module "apim" {
 
   public_network_access_enabled = var.public_network_access_enabled
 
-  apis = merge(var.apis, {
+  apis = merge(local.apis_with_content, {
     "terratest-api" = {
       display_name          = "Terratest API"
       description           = "This is a test API for Terratest"
