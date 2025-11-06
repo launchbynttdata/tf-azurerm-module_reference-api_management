@@ -155,14 +155,38 @@ module "apim" {
 
       import = {
         content_format = "openapi+json"
-        content_value  = null
-        content_url    = "https://example.com/terratest-api.json"
+        content_value  = file("terratest-api.json")
       }
-
       policy = {
-        xml_content = null
-        xml_link    = "https://example.com/terratest-api.policy.xml"
+        xml_content = file("terratest-api.policy.xml")
       }
+      operations = [
+        {
+          operation_id = "getApiResource"
+          display_name = "GET API Resource"
+          method       = "GET"
+          url_template = "/resource"
+          description  = "Get API Resource"
+        },
+        {
+          operation_id = "deleteApiResource"
+          display_name = "DELETE API Resource"
+          method       = "DELETE"
+          url_template = "/resource"
+          description  = "Delete API Resource"
+        }
+      ]
+
+      operation_policies = [
+        {
+          operation_id = "getApiResource"
+          xml_content  = file("getApiResource.policy.xml")
+        },
+        {
+          operation_id = "deleteApiResource"
+          xml_content  = file("deleteApiResource.policy.xml")
+        }
+      ]
     }
   })
   backends = merge(var.backends, {

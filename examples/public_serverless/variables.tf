@@ -161,6 +161,18 @@ variable "apis" {
       xml_content = optional(string, null)
       xml_link    = optional(string, null)
     }), null)
+
+    operations = optional(list(object({
+      operation_id = string
+      display_name = string
+      method       = string
+      url_template = string
+      description  = string
+    })))
+    operation_policies = optional(list(object({
+      operation_id = string
+      xml_content  = string
+    })))
   }))
   default = {}
 }

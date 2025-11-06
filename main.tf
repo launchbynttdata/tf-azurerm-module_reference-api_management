@@ -342,8 +342,8 @@ module "apim_backends" {
 
 
 module "apim_apis" {
-  source  = "terraform.registry.launch.nttdata.com/module_primitive/api_management_api/azurerm"
-  version = "~> 1.0"
+  source = "git::https://github.com/launchbynttdata/tf-azurerm-module_primitive-api_management_api.git?ref=feature/apim-operational-policy"
+  # version = "~> 1.0"
 
   for_each = var.apis
 
@@ -367,6 +367,9 @@ module "apim_apis" {
   contact              = each.value.contact
   license              = each.value.license
   terms_of_service_url = each.value.terms_of_service_url
+
+  operations         = try(each.value.operations, [])
+  operation_policies = try(each.value.operation_policies, [])
 
   # module does not support multiple revisions at this time
   # terraform would destroy the previous revision if changed
