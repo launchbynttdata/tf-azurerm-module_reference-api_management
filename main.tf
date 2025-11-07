@@ -342,8 +342,8 @@ module "apim_backends" {
 
 
 module "apim_apis" {
-  source = "git::https://github.com/launchbynttdata/tf-azurerm-module_primitive-api_management_api.git?ref=feature/apim-operational-policy"
-  # version = "~> 1.0"
+  source  = "terraform.registry.launch.nttdata.com/module_primitive/api_management_api/azurerm"
+  version = "~> 1.1.0"
 
   for_each = var.apis
 

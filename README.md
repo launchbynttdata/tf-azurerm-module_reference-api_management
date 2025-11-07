@@ -137,7 +137,7 @@ No providers.
 | <a name="module_apim_loggers"></a> [apim\_loggers](#module\_apim\_loggers) | terraform.registry.launch.nttdata.com/module_primitive/api_management_logger/azurerm | ~> 1.0 |
 | <a name="module_apim_named_values"></a> [apim\_named\_values](#module\_apim\_named\_values) | terraform.registry.launch.nttdata.com/module_primitive/api_management_named_value/azurerm | ~> 1.0 |
 | <a name="module_apim_backends"></a> [apim\_backends](#module\_apim\_backends) | terraform.registry.launch.nttdata.com/module_primitive/api_management_backend/azurerm | ~> 1.0 |
-| <a name="module_apim_apis"></a> [apim\_apis](#module\_apim\_apis) | git::https://github.com/launchbynttdata/tf-azurerm-module_primitive-api_management_api.git | feature/apim-operational-policy |
+| <a name="module_apim_apis"></a> [apim\_apis](#module\_apim\_apis) | terraform.registry.launch.nttdata.com/module_primitive/api_management_api/azurerm | ~> 1.1.0 |
 | <a name="module_apim_diagnostics"></a> [apim\_diagnostics](#module\_apim\_diagnostics) | terraform.registry.launch.nttdata.com/module_primitive/api_management_diagnostic/azurerm | ~> 1.0 |
 
 ## Resources
