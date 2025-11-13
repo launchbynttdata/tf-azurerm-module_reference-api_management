@@ -290,6 +290,207 @@ variable "additional_nsg_rules" {
   default = []
 }
 
+### SUBRESOURCES
+variable "apis" {
+  description = "A map of API definitions to be created in the API Management Service. The key is the API name and the value is the API definition."
+  type = map(object({
+    display_name          = string
+    path                  = string
+    description           = string
+    protocols             = optional(list(string), ["https"])
+    api_type              = optional(string, "http")
+    service_url           = optional(string, null)
+    soap_pass_through     = optional(bool, null)
+    subscription_required = optional(bool, true)
+    terms_of_service_url  = optional(string, null)
+
+    contact = optional(object({
+      name  = string
+      email = string
+      url   = string
+    }), null)
+
+    import = optional(object({
+      content_format = string
+      content_value  = string
+    }), null)
+
+    license = optional(object({
+      name = string
+      url  = string
+    }), null)
+
+    policy = optional(object({
+      xml_content = optional(string, null)
+      xml_link    = optional(string, null)
+    }), null)
+
+    operations = optional(list(object({
+      operation_id = string
+      display_name = string
+      method       = string
+      url_template = string
+      description  = optional(string)
+    })))
+
+    operation_policies = optional(list(object({
+      operation_id = string
+      xml_content  = optional(string)
+      xml_link     = optional(string)
+    })))
+  }))
+  default = {}
+}
+
+variable "backends" {
+  description = "A map of backend definitions to be created in the API Management Service. The key is the backend name and the value is the backend definition."
+  type = map(object({
+    url = string
+
+    description = optional(string, null)
+    title       = optional(string, null)
+    protocol    = optional(string, "http")
+
+    credentials = object({
+      authorization = optional(object({
+        scheme    = string
+        parameter = string
+      }), null)
+      certificate = optional(list(string), null)
+      query       = optional(map(string), null)
+      header      = optional(map(string), null)
+    })
+
+    proxy = optional(object({
+      url      = string
+      username = string
+      password = optional(string)
+    }), null)
+
+    service_fabric_cluster = optional(object({
+      client_certificate_thumbprint    = optional(string, null)
+      client_certificate_id            = optional(string, null)
+      management_endpoints             = list(string)
+      max_partition_resolution_retries = number
+      server_certificate_thumbprints   = optional(list(string), null)
+      server_x509_names = optional(list(object({
+        issuer_certificate_thumbprint = string
+        name                          = string
+      })), null)
+    }), null)
+
+    tls = optional(object({
+      validate_certificate_name  = optional(bool, true)
+      validate_certificate_chain = optional(bool, true)
+    }), null)
+
+    resource_id = optional(string, null)
+  }))
+  default = {}
+}
+
+variable "certificates" {
+  description = "A map of certificate definitions to be created in the API Management Service. The key is the certificate name and the value is the certificate definition."
+  type = map(object({
+    data                         = optional(string, null)
+    password                     = optional(string, null)
+    key_vault_secret_id          = optional(string, null)
+    key_vault_identity_client_id = optional(string, null)
+  }))
+  default = {}
+}
+
+variable "diagnostics" {
+  description = "A map of diagnostics definitions to be created in the API Management Service. The key is the diagnostic identifier and the value is the diagnostic definition."
+  type = map(object({
+    identifier                = string
+    logger_name               = string
+    api_name                  = optional(string, null)
+    always_log_errors         = optional(bool, false)
+    http_correlation_protocol = optional(string, "W3C")
+    operation_name_format     = optional(string, "Name")
+    log_client_ip             = optional(bool, false)
+    sampling_percentage       = optional(number, 100)
+    verbosity                 = optional(string, "error")
+    frontend_request = optional(object({
+      body_bytes     = optional(number, 0)
+      headers_to_log = optional(list(string), [])
+    }), {})
+    frontend_response = optional(object({
+      body_bytes     = optional(number, 0)
+      headers_to_log = optional(list(string), [])
+    }), {})
+    backend_request = optional(object({
+      body_bytes     = optional(number, 0)
+      headers_to_log = optional(list(string), [])
+    }), {})
+    backend_response = optional(object({
+      body_bytes     = optional(number, 0)
+      headers_to_log = optional(list(string), [])
+    }), {})
+  }))
+  default = {}
+}
+
+variable "loggers" {
+  description = "A map of logger definitions to be created in the API Management Service. The key is the logger name and the value is the logger definition."
+  type = map(object({
+    description = optional(string, null)
+    buffered    = optional(bool, true)
+
+    application_insights = optional(object({
+      instrumentation_key = string
+    }), null)
+
+    eventhub = optional(object({
+      name                             = string
+      connection_string                = optional(string, null)
+      user_assigned_identity_client_id = optional(string, null)
+      endpoint_uri                     = optional(string, null)
+    }), null)
+  }))
+  default = {}
+}
+
+variable "named_values" {
+  description = "A map of named value definitions to be created in the API Management Service."
+  type = map(object({
+    display_name = optional(string, null)
+    value        = optional(string, null)
+    secret       = optional(bool, false)
+    value_from_key_vault = optional(object({
+      secret_id          = string
+      identity_client_id = optional(string, null)
+    }), null)
+  }))
+  default = {}
+
+  validation {
+    condition = alltrue([
+      for name, value in var.named_values : (
+        (value.value != null && value.value_from_key_vault == null) ||
+        (value.value == null && value.value_from_key_vault != null)
+      )
+    ])
+    error_message = "Each named value must have either 'value' or 'value_from_key_vault' set, but not both."
+  }
+
+  validation {
+    condition = alltrue([
+      for name, value in var.named_values : (
+        !(value.secret == false && value.value_from_key_vault != null)
+      )
+    ])
+    error_message = "Named values sourced from Key Vault must be marked as secret."
+  }
+}
+
+variable "key_vaults" {
+  description = "A map of Key Vaults that the API Management Service will be given read access to"
+  type        = map(string)
+  default     = {}
+}
+
 ### IDENTITY
 
 variable "identity_type" {

@@ -35,7 +35,8 @@ func TestApiManagementModule(t *testing.T) {
 			// identity_ids changes from `null` to `[]` after the apply
 			"private": {
 				"IS_TERRAFORM_IDEMPOTENT_APPLY": false,
-				"SKIP_TEST":                     false,
+				// Non-serverless tier APIMs take very long to provision
+				"SKIP_TEST":                     true,
 			},
 			"public_serverless": {
 				"IS_TERRAFORM_IDEMPOTENT_APPLY": false,

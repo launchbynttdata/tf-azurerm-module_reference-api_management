@@ -221,7 +221,6 @@ module "apim" {
   scm_hostname_configuration = var.scm_hostname_configuration
   policy_configuration       = var.policy_configuration
 
-
   notification_sender_email = var.notification_sender_email
 
   enable_http2 = var.enable_http2
@@ -231,7 +230,6 @@ module "apim" {
   enable_sign_in = var.enable_sign_in
   enable_sign_up = var.enable_sign_up
 
-
   terms_of_service_configuration = var.terms_of_service_configuration
   virtual_network_configuration  = var.virtual_network_configuration
 
@@ -240,4 +238,169 @@ module "apim" {
   tags = local.tags
 
   depends_on = [module.resource_group, module.public_ip]
+}
+
+module "key_vault_role_assignments" {
+  source  = "terraform.registry.launch.nttdata.com/module_primitive/role_assignment/azurerm"
+  version = "~> 1.0"
+
+  for_each = var.key_vaults
+
+  scope                = each.value
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = module.apim.api_management_identity[0].principal_id
+
+  depends_on = [module.apim]
+}
+
+module "apim_certificates" {
+  source  = "terraform.registry.launch.nttdata.com/module_primitive/api_management_certificate/azurerm"
+  version = "~> 1.0"
+
+  for_each = var.certificates
+
+  resource_group_name = var.resource_group_name != null ? var.resource_group_name : module.resource_group[0].name
+  api_management_name = module.apim.api_management_name
+
+  name                         = each.key
+  data                         = each.value.data
+  password                     = each.value.password
+  key_vault_secret_id          = each.value.key_vault_secret_id
+  key_vault_identity_client_id = each.value.key_vault_identity_client_id
+
+  depends_on = [module.apim, module.key_vault_role_assignments]
+}
+
+module "apim_loggers" {
+  source  = "terraform.registry.launch.nttdata.com/module_primitive/api_management_logger/azurerm"
+  version = "~> 1.0"
+
+  for_each = var.loggers
+
+  resource_group_name = var.resource_group_name != null ? var.resource_group_name : module.resource_group[0].name
+  api_management_name = module.apim.api_management_name
+
+  name        = each.key
+  buffered    = each.value.buffered
+  description = each.value.description
+
+  application_insights = each.value.application_insights
+  eventhub             = each.value.eventhub
+
+  depends_on = [module.apim]
+}
+
+module "apim_named_values" {
+  source  = "terraform.registry.launch.nttdata.com/module_primitive/api_management_named_value/azurerm"
+  version = "~> 1.0"
+
+  for_each = var.named_values
+
+  resource_group_name = var.resource_group_name != null ? var.resource_group_name : module.resource_group[0].name
+  api_management_name = module.apim.api_management_name
+
+  name                 = each.key
+  display_name         = coalesce(each.value.display_name, each.key)
+  value                = each.value.value
+  secret               = each.value.secret
+  value_from_key_vault = each.value.value_from_key_vault
+
+  depends_on = [module.apim, module.key_vault_role_assignments]
+}
+
+module "apim_backends" {
+  source  = "terraform.registry.launch.nttdata.com/module_primitive/api_management_backend/azurerm"
+  version = "~> 1.0"
+
+  for_each = var.backends
+
+  resource_group_name = var.resource_group_name != null ? var.resource_group_name : module.resource_group[0].name
+  api_management_name = module.apim.api_management_name
+
+  name        = each.key
+  title       = each.value.title
+  description = each.value.description
+  url         = each.value.url
+  protocol    = each.value.protocol
+
+  credentials = each.value.credentials != null ? {
+    authorization = each.value.credentials.authorization
+    certificate = each.value.credentials.certificate != null ? [
+      // Users of this module define certificates by name, here we map those names to the thumbprints
+      for cert in each.value.credentials.certificate : module.apim_certificates[cert].certificate_thumbprint
+    ] : null
+    header = each.value.credentials.header
+    query  = each.value.credentials.query
+  } : null
+  proxy                  = each.value.proxy
+  resource_id            = each.value.resource_id
+  service_fabric_cluster = each.value.service_fabric_cluster
+  tls                    = each.value.tls
+
+  depends_on = [module.apim, module.apim_certificates]
+}
+
+
+module "apim_apis" {
+  source  = "terraform.registry.launch.nttdata.com/module_primitive/api_management_api/azurerm"
+  version = "~> 1.1.0"
+
+  for_each = var.apis
+
+  resource_group_name = var.resource_group_name != null ? var.resource_group_name : module.resource_group[0].name
+  api_management_name = module.apim.api_management_name
+
+  name         = each.key
+  display_name = each.value.display_name
+  description  = each.value.description
+  path         = each.value.path
+  protocols    = each.value.protocols
+  api_type     = each.value.api_type
+
+  service_url           = each.value.service_url
+  soap_pass_through     = each.value.soap_pass_through
+  subscription_required = each.value.subscription_required
+
+  import = each.value.import
+  policy = each.value.policy
+
+  contact              = each.value.contact
+  license              = each.value.license
+  terms_of_service_url = each.value.terms_of_service_url
+
+  operations         = try(each.value.operations, [])
+  operation_policies = try(each.value.operation_policies, [])
+
+  # module does not support multiple revisions at this time
+  # terraform would destroy the previous revision if changed
+  revision = "1"
+
+  depends_on = [module.apim, module.apim_backends, module.apim_named_values]
+}
+
+module "apim_diagnostics" {
+  source  = "terraform.registry.launch.nttdata.com/module_primitive/api_management_diagnostic/azurerm"
+  version = "~> 1.0"
+
+  for_each = var.diagnostics
+
+  resource_group_name = var.resource_group_name != null ? var.resource_group_name : module.resource_group[0].name
+  api_management_name = module.apim.api_management_name
+  logger_name         = each.value.logger_name
+  api_name            = each.value.api_name
+  identifier          = each.value.identifier
+
+  always_log_errors         = each.value.always_log_errors
+  http_correlation_protocol = each.value.http_correlation_protocol
+  operation_name_format     = each.value.operation_name_format
+  log_client_ip             = each.value.log_client_ip
+  sampling_percentage       = each.value.sampling_percentage
+  verbosity                 = each.value.verbosity
+
+  frontend_request  = each.value.frontend_request
+  frontend_response = each.value.frontend_response
+  backend_request   = each.value.backend_request
+  backend_response  = each.value.backend_response
+
+  depends_on = [module.apim_apis, module.apim_loggers]
 }
