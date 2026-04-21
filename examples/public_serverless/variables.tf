@@ -39,12 +39,6 @@ variable "environment_number" {
   default     = "001"
 }
 
-variable "resource_number" {
-  description = "The resource count for the respective resource. Defaults to 000. Increments in value of 1"
-  type        = string
-  default     = "001"
-}
-
 variable "region" {
   description = "Azure Region in which the infra needs to be provisioned"
   type        = string

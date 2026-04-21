@@ -6,5 +6,3 @@ public_network_access_enabled = true
 product_family = "launchdso"
 
 use_service_principal = true
-
-resource_number = "001"
